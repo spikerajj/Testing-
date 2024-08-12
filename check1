@@ -1,0 +1,113 @@
+If you haven’t already set up an Angular project, you can create one using Angular CLI:
+ng new dependent-dropdown-project
+cd dependent-dropdown-project
+
+ng add @angular/material
+
+Create Components
+ng generate component dropdown-modal
+
+dropdown-modal.component.html
+<mat-form-field appearance="fill">
+  <mat-label>Primary Dropdown</mat-label>
+  <mat-select [(value)]="selectedPrimary" (selectionChange)="onPrimaryChange($event.value)">
+    <mat-option *ngFor="let option of primaryOptions" [value]="option.value">{{ option.viewValue }}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<mat-form-field appearance="fill">
+  <mat-label>Dependent Dropdown</mat-label>
+  <mat-select [(value)]="selectedSecondary">
+    <mat-option *ngFor="let option of secondaryOptions" [value]="option.value">{{ option.viewValue }}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<button mat-raised-button color="primary" (click)="openModal()">Open Modal</button>
+
+<ng-template #modalTemplate>
+  <h1 mat-dialog-title>Modal Title</h1>
+  <div mat-dialog-content>
+    <p>Selected values: Primary - {{ selectedPrimary }}, Secondary - {{ selectedSecondary }}</p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="closeModal()">Close</button>
+  </div>
+</ng-template>
+
+
+(dropdown-modal.component.ts
+import { Component, Inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+
+@Component({
+  selector: 'app-dropdown-modal',
+  templateUrl: './dropdown-modal.component.html',
+  styleUrls: ['./dropdown-modal.component.css']
+})
+export class DropdownModalComponent {
+  primaryOptions = [
+    { value: '1', viewValue: 'Option 1' },
+    { value: '2', viewValue: 'Option 2' }
+  ];
+  secondaryOptions = [];
+  selectedPrimary: string;
+  selectedSecondary: string;
+
+  constructor(public dialog: MatDialog) {}
+
+  onPrimaryChange(selectedValue: string) {
+    // Update secondaryOptions based on selectedPrimary
+    if (selectedValue === '1') {
+      this.secondaryOptions = [
+        { value: '1-1', viewValue: 'Sub-option 1-1' },
+        { value: '1-2', viewValue: 'Sub-option 1-2' }
+      ];
+    } else if (selectedValue === '2') {
+      this.secondaryOptions = [
+        { value: '2-1', viewValue: 'Sub-option 2-1' },
+        { value: '2-2', viewValue: 'Sub-option 2-2' }
+      ];
+    }
+    this.selectedSecondary = null; // Reset secondary selection when primary changes
+  }
+
+  openModal() {
+    this.dialog.open(this.modalTemplate);
+  }
+
+  closeModal() {
+    this.dialog.closeAll();
+  }
+}
+
+app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+
+import { AppComponent } from './app.component';
+import { DropdownModalComponent } from './dropdown-modal/dropdown-modal.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DropdownModalComponent
+  ],
+  imports: [
+    BrowserModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  entryComponents: [DropdownModalComponent]
+})
+export class AppModule { }
+
+cs
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
